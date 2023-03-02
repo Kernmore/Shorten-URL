@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Shorten URL Service</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css">
+</head>
+
+<body>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <br><br>
+            <h1 class="text-center mb-4">Shorten URL Service</h1>
+
+            <form class="mb-4" onsubmit="submitForm(event)">
+                <div class="form-group">
+                    <label for="url">Enter URL:</label>
+                    <input type="url" class="form-control" id="url" name="url" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Shorten</button>
+            </form>
+
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th scope="col">URL</th>
+                        <th scope="col">Short URL</th>
+                        <th scope="col">Redirects</th>
+                        <th scope="col">Timestamp</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="dto : ${dtos}">
+                        <td th:text="${dto.url}"></td>
+                        <td><a class="btn btn-primary" target="_blank" th:href="@{/my/{shortUrl}(shortUrl=${dto.shortUrl})}" th:text="${dto.shortUrl}">Go to Link</a></td>
+                        <td th:text="${dto.redirects}"></td>
+                        <td th:text="${#dates.format(dto.lastAccess, 'dd MMM yyyy |   HH:mm')}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <script>
+                const form = document.querySelector('form');
+
+                form.addEventListener('submit', async (event) => {
+                    event.preventDefault();
+                    const formData = new FormData(form);
+                    const response = await fetch('/shorten', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(Object.fromEntries(formData)),
+                    });
+
+                    if (response.ok) {
+                        location.reload(); // reload the page
+                    } else {
+                        alert('Error creating shortened URL.');
+                    }
+                });
+            </script>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.min.js"></script>
+</body>
+</html>
